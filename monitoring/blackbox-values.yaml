@@ -1,0 +1,25 @@
+# Blackbox exporter: probes each focus service every 15s.
+# Gives availability (probe_success) and latency (probe_duration_seconds) per service.
+serviceMonitor:
+  enabled: true
+  defaults:
+    interval: 15s
+    scrapeTimeout: 10s
+    module: http_2xx
+  targets:
+    - name: web
+      url: http://web.robot-shop.svc.cluster.local:8080/
+      additionalMetricsRelabels:
+        service: web
+    - name: catalogue
+      url: http://catalogue.robot-shop.svc.cluster.local:8080/health
+      additionalMetricsRelabels:
+        service: catalogue
+    - name: cart
+      url: http://cart.robot-shop.svc.cluster.local:8080/health
+      additionalMetricsRelabels:
+        service: cart
+    - name: payment
+      url: http://payment.robot-shop.svc.cluster.local:8080/health
+      additionalMetricsRelabels:
+        service: payment

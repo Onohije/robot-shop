@@ -1,0 +1,33 @@
+# Routes SLO alerts to Slack. The webhook URL lives in the Secret "slack-webhook" (never in Git).
+apiVersion: monitoring.coreos.com/v1alpha1
+kind: AlertmanagerConfig
+metadata:
+  name: robot-shop-slack
+  namespace: monitoring
+  labels:
+    alertmanagerConfig: robot-shop
+spec:
+  route:
+    receiver: slack
+    groupBy: ["alertname", "service"]
+    groupWait: 30s
+    groupInterval: 2m
+    repeatInterval: 1h
+    matchers:
+      - name: slo
+        value: availability
+        matchType: "="
+  receivers:
+    - name: slack
+      slackConfigs:
+        - apiURL:
+            name: slack-webhook
+            key: url
+          channel: "#alerts"
+          sendResolved: true
+          title: '[{{ .Status | toUpper }}] {{ .CommonLabels.alertname }}'
+          text: |-
+            {{ range .Alerts }}*{{ .Annotations.summary }}*
+            {{ .Annotations.description }}
+            Runbook: {{ .Annotations.runbook_url }}
+            {{ end }}

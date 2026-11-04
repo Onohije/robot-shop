@@ -1,0 +1,15 @@
+# Tells the OpenTelemetry Operator how to auto-instrument pods in robot-shop.
+# A pod opts in with the annotation  instrumentation.opentelemetry.io/inject-java: "true"
+apiVersion: opentelemetry.io/v1alpha1
+kind: Instrumentation
+metadata:
+  name: robot-shop
+  namespace: robot-shop
+spec:
+  exporter:
+    endpoint: http://otel-collector.monitoring.svc.cluster.local:4318
+  propagators:
+    - tracecontext
+    - baggage
+  sampler:
+    type: parentbased_always_on

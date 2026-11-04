@@ -1,0 +1,13 @@
+# Fluent Bit: runs on every node (DaemonSet), tails container logs, ships to Loki.
+# The chart's default inputs/filters already read /var/log/containers and add Kubernetes metadata.
+config:
+  outputs: |
+    [OUTPUT]
+        Name            loki
+        Match           kube.*
+        Host            loki.monitoring.svc.cluster.local
+        Port            3100
+        labels          job=fluent-bit, namespace=$kubernetes['namespace_name'], pod=$kubernetes['pod_name'], container=$kubernetes['container_name'], service=$kubernetes['labels']['service']
+        remove_keys     kubernetes, stream
+        drop_single_key on
+        line_format     key_value

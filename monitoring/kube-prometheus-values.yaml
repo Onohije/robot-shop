@@ -1,4 +1,5 @@
-# Parts of the control plane that EKS manages and doesn't expose
+# kube-prometheus-stack values for EKS
+# Control-plane parts that EKS manages and does not expose
 kubeControllerManager:
   enabled: false
 kubeScheduler:
@@ -10,7 +11,32 @@ kubeProxy:
 
 prometheus:
   prometheusSpec:
-    # Pick up ServiceMonitors / PodMonitors from any namespace and release
+    # Pick up monitors and rules from any namespace / release
     serviceMonitorSelectorNilUsesHelmValues: false
     podMonitorSelectorNilUsesHelmValues: false
+    ruleSelectorNilUsesHelmValues: false
+    probeSelectorNilUsesHelmValues: false
     retention: 2d
+
+alertmanager:
+  alertmanagerSpec:
+    # Load our Slack routing from AlertmanagerConfig objects with this label
+    alertmanagerConfigSelector:
+      matchLabels:
+        alertmanagerConfig: robot-shop
+    # Don't force a namespace matcher onto our route (alerts carry namespace=robot-shop)
+    alertmanagerConfigMatcherStrategy:
+      type: None
+
+grafana:
+  additionalDataSources:
+    - name: Loki
+      uid: loki
+      type: loki
+      access: proxy
+      url: http://loki.monitoring.svc.cluster.local:3100
+    - name: Jaeger
+      uid: jaeger
+      type: jaeger
+      access: proxy
+      url: http://jaeger.monitoring.svc.cluster.local:16686
